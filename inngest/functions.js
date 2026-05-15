@@ -6,8 +6,9 @@ import prisma from '@/lib/prisma'
 //inngest function to save a user to a user database
 
 export const syncUserCreation = inngest.createFunction(
-    {id: 'sync-user-create'},
-    {event: 'clerk/user.created'},
+    {id: 'sync-user-create',
+    event: 'clerk/user.created'
+    },
     async ({event})=>{
         const {data} =  event
         await prisma.user.create({
@@ -26,8 +27,9 @@ export const syncUserCreation = inngest.createFunction(
 
 // function to update user in database
 export const syncUserUpdate = inngest.createFunction(
-    {id: 'sync-user-update'},
-    {event: 'clerk/user.updated'},
+    {id: 'sync-user-create',
+    event: 'clerk/user.created'
+    },
     async ({event})=>{
         const {data} =  event
         await prisma.user.update({
@@ -43,8 +45,9 @@ export const syncUserUpdate = inngest.createFunction(
 
 // function to delete user in database
 export const syncUserDelete = inngest.createFunction(
-    { id: 'sync-user-delete' },
-    { event: 'clerk/user.deleted' },
+    {id: 'sync-user-create',
+    event: 'clerk/user.created'
+    },
     async ({ event }) => {
         const { data } = event;
 
