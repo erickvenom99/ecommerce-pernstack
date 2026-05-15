@@ -10,8 +10,12 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.3.3",
+    "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@reduxjs/toolkit": "^2.8.2",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.4.2",
     "lucide-react": "^0.525.0",
     "next": "^15.5.18",
     "react": "^19.2.1",
@@ -22,6 +26,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "prisma": "^7.8.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.0"
   }
 }
