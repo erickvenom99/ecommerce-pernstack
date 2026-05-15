@@ -1,12 +1,10 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["driverAdapters"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["schemaEngineDriverAdapters"] // Updated for v7
 }
 
 datasource db {
     provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
 }
 
 // Required for creating a User: id, name, email, image, cart (optional JSON string)
