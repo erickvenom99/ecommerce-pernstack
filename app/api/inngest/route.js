@@ -9,4 +9,8 @@ export const { GET, POST, PUT } = serve({
     syncUserUpdate,
     syncUserDelete
   ],
+  signingKey: process.env.INNGEST_SIGNING_KEY,
+  
+  // This explicitly ensures the framework handles local connection tuning safely
+  streaming: "allow",
 });
