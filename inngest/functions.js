@@ -65,3 +65,20 @@ export const syncUserDelete = inngest.createFunction(
     })
   }
 )
+
+
+//inngest function to delete coupon on expire
+export const deleteCouponOnExpiry = inngest.createFunction(
+  {id: 'delete-coupon-on-expiry', trigger: [{event: 'app.coupon.expired'}]},
+  async({event, step})=> {
+    const {data} = event
+    const expiryDate = new Date(data.expires_at)
+    await step.sleepUntil('wait-for-expiry', expiryDate)
+    await step.run('delete-coupon-from-database', async()=>{
+      await prisma.coupon.deleteMany({
+        where: {code: data.code}
+      })
+    })
+
+  }
+)
