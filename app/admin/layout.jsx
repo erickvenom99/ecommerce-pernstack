@@ -1,4 +1,4 @@
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminAuthWrapper from "@/components/admin/AdminAuthWrapper"
 
 export const metadata = {
     title: "GoCart. - Admin",
@@ -8,10 +8,8 @@ export const metadata = {
 export default function RootAdminLayout({ children }) {
 
     return (
-        <>
-            <AdminLayout>
-                {children}
-            </AdminLayout>
-        </>
+                <AdminAuthWrapper>.
+                    {children}
+                </AdminAuthWrapper>
     );
 }
