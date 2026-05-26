@@ -69,16 +69,33 @@ export const syncUserDelete = inngest.createFunction(
 
 //inngest function to delete coupon on expire
 export const deleteCouponOnExpiry = inngest.createFunction(
-  {id: 'delete-coupon-on-expiry', trigger: [{event: 'app.coupon.expired'}]},
-  async({event, step})=> {
-    const {data} = event
-    const expiryDate = new Date(data.expires_at)
-    await step.sleepUntil('wait-for-expiry', expiryDate)
-    await step.run('delete-coupon-from-database', async()=>{
-      await prisma.coupon.deleteMany({
-        where: {code: data.code}
-      })
-    })
+  { id: 'delete-coupon-on-expiry', triggers: [{ event: 'app.coupon.expired' }] },
+  async ({ event, step }) => {
+    const { data } = event;
+    
+   
+    const targetDate = data.expired_at; 
+    
+    if (!targetDate) {
+      console.error(`[Inngest] Aborting workflow: Missing 'expired_at' field for coupon code: ${data.code}`);
+      return;
+    }
 
+    const dateOnlyString = targetDate.includes('T') ? targetDate.split('T')[0] : targetDate;
+    const expiryDate = new Date(`${dateOnlyString}T00:00:00`); 
+
+    if (isNaN(expiryDate.getTime())) {
+      console.error(`[Inngest] Aborting workflow: String '${targetDate}' failed to parse into a valid Date object.`);
+      return;
+    }
+
+
+    await step.sleepUntil('wait-for-expiry', expiryDate);
+
+    await step.run('delete-coupon-from-database', async () => {
+      await prisma.coupon.deleteMany({
+        where: { code: data.code }
+      });
+    });
   }
-)
+);
