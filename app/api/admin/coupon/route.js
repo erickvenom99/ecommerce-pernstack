@@ -1,5 +1,7 @@
 //add coupon
 
+export const dynamic = 'force-dynamic';
+
 import { inngest } from "@/inngest/client";
 import { prisma } from "@/lib/prisma";
 import authAdmin from "@/middleware/authAdmin";
@@ -18,18 +20,30 @@ export async function POST(request){
 
     const body = await request.json()
     const coupon = body.coupon
-    coupon.code = coupon.code.toUpperCase()
-    await prisma.coupon.create({data: coupon}).then(async (coupon)=>{
+    const normalizeCode = coupon.code.trim().toUpperCase()
+
+    const existingCoupon = await prisma.coupon.findUnique({
+        where: { code: normalizeCode }
+        });
+
+    if (existingCoupon) {
+        return NextResponse.json(
+            { error: `The coupon code '${normalizeCode}' already exists. Please choose a different name.` }, 
+            { status: 400 }
+        );
+    }
+
+    const createCoupon = await prisma.coupon.create({data: coupon})
         //run inngest schedular function 
         await inngest.send({
             name: "app.coupon.expired",
             data: {
-                code: coupon.code,
-                expired_at: coupon.expiresAt,
+                code: createCoupon.code,
+                expiresAt: createCoupon.expiresAt,
             }
         })
-    })
-    return NextResponse.json({message: 'coupon added successfully'}, {status: 200})
+   
+    return NextResponse.json({message: 'coupon added successfully'}, {createCoupon}, {status: 200})
 }
 catch(error){
     console.error(error)
@@ -78,6 +92,9 @@ export async function DELETE(request){
 export async function GET(request){
     try{
         const {userId} = await auth(request)
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         const isAdmin = await authAdmin(userId)
         if(!isAdmin){
             return NextResponse.json({error: 'unauthorized user'}, {status:403})
