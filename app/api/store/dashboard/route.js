@@ -16,27 +16,14 @@ export async function GET(request) {
             return NextResponse.json({ error: 'Seller store not found' }, { status: 401 })
         }
         
+
         const storeId = storeInfo.id 
 
-        // 1. FIXED: Named variable orderMetrics to match calculation variables below
-        // Note: Change to .order if your Prisma schema uses singular naming
-        const orderMetrics = await prisma.order.aggregate({
-            where: { storeId: storeId },
-            _count: { id: true },
-            _sum: { total: true }
-        })
-
-        // 2. FIXED: Count products using a standardized naming layout
-        // Note: Change to .product if your Prisma schema uses singular naming
-        const totalProductCount = await prisma.product.count({
-            where: { storeId: storeId }
-        })
-
-        // 3. FIXED: Corrected .findMan typo to .findMany
-        const sellerProduct = await prisma.product.findMany({
-            where: { storeId: storeId },
-            select: { id: true }
-        })
+        const [orderMetrics, totalProductCount, sellerProduct] = await Promise.all([
+                prisma.order.aggregate({ where: { storeId }, _count: { id: true }, _sum: { total: true } }),
+                prisma.product.count({ where: { storeId } }),
+                prisma.product.findMany({ where: { storeId }, select: { id: true } }),
+                ])
 
         const productIds = sellerProduct.map(p => p.id)
 
@@ -44,7 +31,7 @@ export async function GET(request) {
             where: { productId: { in: productIds } },
             include: {
                 user: {
-                    select: { name: true, imageUrl: true } 
+                    select: { name: true, image: true } 
                 }, 
                 product: {
                     select: { name: true }
@@ -58,6 +45,7 @@ export async function GET(request) {
         const totalEarnings = Math.round(orderMetrics._sum.total || 0);
 
         const dashboardData = {
+            success: true,
             ratings,
             totalOrder,
             totalEarnings,

@@ -1,4 +1,4 @@
-import StoreLayout from "@/components/store/StoreLayout";
+import StoreAuthWrapper from "@/components/store/StoreAuthWrapper";
 
 export const metadata = {
     title: "GoCart. - Store Dashboard",
@@ -9,9 +9,9 @@ export default function RootAdminLayout({ children }) {
 
     return (
         <>
-            <StoreLayout>
+            <StoreAuthWrapper>
                 {children}
-            </StoreLayout>
+            </StoreAuthWrapper>
         </>
     );
 }

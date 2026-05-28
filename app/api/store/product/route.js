@@ -1,5 +1,6 @@
 import  imagekit  from "@/lib/imagekit";
 import { prisma } from "@/lib/prisma";
+import { toFile } from "@imagekit/nodejs";
 import authSeller from "@/middleware/authSeller";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
