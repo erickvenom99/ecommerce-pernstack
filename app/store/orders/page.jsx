@@ -23,7 +23,7 @@ export default function StoreOrders() {
             toast.error(error?.response?.data?.error || error.message)
             
         }finally {
-       setLoading(false)
+         setLoading(false)
         }
     }
 

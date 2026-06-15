@@ -39,7 +39,6 @@ export default function AdminDashboard() {
         try {
             const token = await getToken()
             
-            // 🟢 FIXED: Added leading forward slash to target absolute route accurately
             const res = await axios.get('/api/admin/dashboard', {
                 headers: { Authorization: `Bearer ${token}` }
             })

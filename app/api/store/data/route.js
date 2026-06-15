@@ -15,7 +15,7 @@ export async function GET(request){
 
         const storeProduct = await prisma.store.findUnique({
             where: {username: username.toLowerCase()},
-            include: {products : {include: {rating: true}}}
+            include: {Product : {include: {rating: true}}}
         })
         if(!storeProduct) {
             return NextResponse.json({error: "Store not found"}, {status: 404})
@@ -29,9 +29,9 @@ export async function GET(request){
             return NextResponse.json({error: "The store front is currently unavailable"}, {status: 403})
         }
 
-        const {products, ...storeInfo} = storeProduct
+        const {Product, ...storeInfo} = storeProduct
 
-        return NextResponse.json({success: true, store: storeInfo, products: products}, {status: 200})
+        return NextResponse.json({success: true, store: storeInfo, products: Product}, {status: 200})
 
     }catch(error){
         console.error("Failed to find store and get product information", error)

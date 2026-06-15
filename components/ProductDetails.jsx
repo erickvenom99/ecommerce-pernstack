@@ -1,12 +1,13 @@
 'use client'
 
-import { addToCart } from "@/lib/features/cart/cartSlice";
+import { addToCart, uploadCart } from "@/lib/features/cart/cartSlice";
 import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
+import { useAuth } from "@clerk/nextjs";
 
 const ProductDetails = ({ product }) => {
 
@@ -15,13 +16,20 @@ const ProductDetails = ({ product }) => {
 
     const cart = useSelector(state => state.cart.cartItems);
     const dispatch = useDispatch();
+    const {getToken} = useAuth()
 
     const router = useRouter()
 
     const [mainImage, setMainImage] = useState(product.images[0]);
 
-    const addToCartHandler = () => {
+    const addToCartHandler = async () => {
         dispatch(addToCart({ productId }))
+        try {
+            const token = await getToken();
+            dispatch(uploadCart({ token }))
+        } catch (error) {
+            console.error("Failed to sync cart item with database:", error);
+        }
     }
 
     const averageRating = product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length;
