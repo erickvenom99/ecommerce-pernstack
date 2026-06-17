@@ -1,0 +1,206 @@
+import { prisma } from "@/lib/prisma"
+import { auth } from "@clerk/nextjs/server"
+import { PaymentMethod } from "@prisma/client"
+import { NextResponse } from "next/server"
+
+export async function POST(request) {
+    try {
+        const { userId, has } = await auth()
+
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized user" }, { status: 401 })
+        }
+
+        const body = await request.json()
+        const { addressId, couponCode, paymentMethod, items } = body
+
+        // Validate structural inputs
+        if (!addressId || !paymentMethod || !Array.isArray(items) || items.length === 0) {
+            return NextResponse.json({ error: "Missing order information" }, { status: 400 })
+        }
+
+        // Validate address ownership
+        const address = await prisma.address.findFirst({
+            where: { id: addressId, userId }
+        })
+
+        if (!address) {
+            return NextResponse.json({ error: "Invalid address" }, { status: 400 })
+        }
+
+        // Coupon validation
+        let coupon = null
+        if (couponCode) {
+            coupon = await prisma.coupon.findFirst({
+                where: {
+                    code: couponCode.toUpperCase(),
+                    expiresAt: { gt: new Date() }
+                }
+            })
+
+            if (!coupon) {
+                return NextResponse.json({ error: "Coupon not found or expired" }, { status: 404 })
+            }
+
+            if (coupon.forNewUser) {
+                const existingSuccessfulOrders = await prisma.order.count({
+                    where: {
+                        userId,
+                        status: { in: ["ORDER_PLACED", "PROCESSING", "SHIPPED", "DELIVERED", ]}
+                    }
+                })
+
+                if (existingSuccessfulOrders > 0) {
+                    return NextResponse.json({ error: "Coupon is for new users only" }, { status: 400 })
+                }
+            }
+        }
+
+        const isMemberPlan = has({ plan: "plus" })
+
+        if (coupon?.forMember && !isMemberPlan) {
+            return NextResponse.json({ error: "Coupon is for plus members only" }, { status: 400 })
+        }
+
+        // Fetch products mapping
+        const productIds = items.map(item => item.id)
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds } }
+        })
+
+        if (products.length !== productIds.length) {
+            return NextResponse.json({ error: "One or more products were not found" }, { status: 404 })
+        }
+
+        const productsMap = Object.fromEntries(products.map(product => [product.id, product]))
+
+        for (const item of items) {
+            const product = productsMap[item.id]
+            if (!product || !product.inStock) {
+                return NextResponse.json({
+                    error: `${product?.name || 'Product'} is currently out of stock.`
+                }, { status: 400 })
+            }
+        }
+
+        // Group items by storeId
+        const ordersByStore = new Map()
+        for (const item of items) {
+            const product = productsMap[item.id]
+            const storeId = product.storeId
+
+            if (!ordersByStore.has(storeId)) {
+                ordersByStore.set(storeId, [])
+            }
+
+            ordersByStore.get(storeId).push({
+                ...item,
+                price: product.price
+            })
+        }
+
+        // Calculate split shipping fee distribution metrics
+        const totalVendors = ordersByStore.size
+        const shippingPerVendor = (!isMemberPlan && totalVendors > 0) ? (5 / totalVendors) : 0
+
+        // Transaction Execution
+        const result = await prisma.$transaction(async (tx) => {
+            const orderIds = []
+            let fullAmount = 0
+
+            for (const [storeId, sellerItems] of ordersByStore.entries()) {
+                let total = sellerItems.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+
+                if (coupon) {
+                    total -= (total * coupon.discount) / 100
+                }
+
+                total += shippingPerVendor
+                total = Number(total.toFixed(2))
+                fullAmount += total
+
+                
+                for (const item of sellerItems) {
+                    const product = productsMap[item.id]
+                    
+                    const txProduct = await tx.product.findUnique({
+                        where: { id: item.id }
+                    })
+
+                    if (!txProduct || !txProduct.inStock) {
+                        throw new Error(`${product.name} is no longer available.`)
+                    }
+                }
+
+                // Create individual store sub-order record
+                const order = await tx.order.create({
+                    data: {
+                        userId,
+                        storeId,
+                        addressId,
+                        total,
+                        paymentMethod,
+                        isCouponUsed: Boolean(coupon),
+                        coupon: coupon ? coupon : null,
+                        orderItems: {
+                            create: sellerItems.map(item => ({
+                                productId: item.id,
+                                quantity: item.quantity,
+                                price: item.price
+                            }))
+        
+                        }
+                    }
+                })
+
+                orderIds.push(order.id)
+            }
+
+            // Wipe checkout cart array parameters clean
+            await tx.user.update({
+                where: { id: userId },
+                data: { cart: {} }
+            })
+        })
+
+        return NextResponse.json({
+            message: "Order created successfully",
+        }, { status: 201 })
+
+    } catch (error) {
+        console.error("Failed to create order:", error)
+        return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
+    }
+}
+
+
+
+export async function GET(request) {
+    try {
+        const { userId } = await auth()
+
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized user" }, { status: 401 })
+        }
+
+        const orders = await prisma.order.findMany({
+            where: { userId, OR: [
+                {paymentMethod: PaymentMethod.COD},
+                {AND: [{paymentMethod: PaymentMethod.STRIPE}, {isPaid: true}]}
+            ]},
+            include: {
+            orderItems: {include: {product: true}},
+            address: true,
+            },
+            orderBy: {createdAt: 'desc'}
+        })
+        return NextResponse.json({orders}, {status: 200})
+    } catch (error) {
+        console.error('Failed to fetch order:', error)
+        console.error('Error name:', error?.name)
+        console.error('Error message:', error?.message)
+        console.error('Error stack:', error?.stack)
+        return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
+        
+    }
+}

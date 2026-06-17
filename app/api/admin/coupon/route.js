@@ -33,7 +33,8 @@ export async function POST(request){
         );
     }
 
-    const createCoupon = await prisma.coupon.create({data: coupon})
+    const createCoupon = await prisma.coupon.create({data: 
+        {...coupon, code: normalizeCode}})
         //run inngest schedular function 
         await inngest.send({
             name: "app.coupon.expired",
@@ -43,7 +44,7 @@ export async function POST(request){
             }
         })
    
-    return NextResponse.json({message: 'coupon added successfully'}, {createCoupon}, {status: 200})
+    return NextResponse.json({message: 'coupon added successfully', coupons: createCoupon}, {status: 200})
 }
 catch(error){
     console.error(error)

@@ -36,11 +36,12 @@ export default function Dashboard() {
             const token = await getToken()
             const res = await axios.get('/api/store/dashboard', {headers: {Authorization: `Bearer ${token}`}})
             if (res.data && res.data.success) {
+                const data = res.data.dashboardData;
             setDashboardData({
-                totalProducts: res.data.totalProducts ?? 0,
-                totalEarnings: res.data.totalEarnings ?? 0,
-                totalOrders: res.data.totalOrders ?? 0,
-                ratings: res.data.ratings || []
+                totalProducts: data.totalProduct ?? 0,
+                totalEarnings: data.totalEarnings ?? 0,
+                totalOrders: data.totalOrder ?? 0,
+                ratings: data.ratings || []
             })
         }
         } catch (error) {

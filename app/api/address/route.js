@@ -15,7 +15,6 @@ export async function POST(request){
         if(!address){
             return NextResponse.json({error: 'missing address payload'}, {status: 400})
         }
-        address.userId = userId
         const newAddress = await prisma.address.create({
             data: {...address, userId}
         })
@@ -27,3 +26,29 @@ export async function POST(request){
         
     }
 }
+
+
+//get all addresses 
+
+
+export async function GET(request){
+    try {
+        const {userId} = await auth()
+        if (!userId) {                            
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            }
+     
+        const newAddress = await prisma.address.findMany({
+            where: { userId }
+        })
+
+        return NextResponse.json({message: 'Address fectched successfully', newAddress}, {status: 201} )
+        
+    } catch (error) {
+    console.error('Failed to fetch address', error)
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
+        
+    }
+}
+
+

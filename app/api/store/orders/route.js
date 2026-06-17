@@ -9,19 +9,19 @@ import { NextResponse } from "next/server";
 
 export async function POST(request){ 
     try {
-        const userId = await auth()
+        const {userId} = await auth()
         const store = await authSeller(userId)
         if(!store){
             return NextResponse.json({error: 'unauthorized user'}, {status: 403})
         }
         const body = await request.json()
-        const[orderId, status] = body
+        const {orderId, status} = body
     
         if(!orderId || !status) {
             return NextResponse.json({error: "Missing order info and status info"}, {status: 400})
         }
         const storeId = store.id
-        const updateOrder = await prisma.order.update({
+        const updateOrder = await prisma.order.updateMany({
             where: {id: orderId, storeId},
             data: {status}
         })
@@ -49,7 +49,7 @@ export async function GET(request){
         }
         const storeId = store.id
         const orders = await prisma.order.findMany({
-            where: {id : storeId},
+            where: {storeId},
             include: {
                 user: true,
                 address: true,
@@ -60,6 +60,9 @@ export async function GET(request){
         return NextResponse.json({orders})
     } catch (error) {
         console.error('Failed to fetch order', error)
+        console.error('Error name:', error?.name)
+        console.error('Error message:', error?.message)
+        console.error('Error stack:', error?.stack) 
         return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
     }
 }
