@@ -192,6 +192,11 @@ export async function POST(request) {
         let paystackSession = null
         if (paymentMethod === 'PAYSTACK') {
             const amountInKobo = Math.round(fullAmount * 100)
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL 
+                ? process.env.NEXT_PUBLIC_APP_URL 
+                : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+
+            const callbackUrl = `${appUrl}/cart`;
             
             const response = await axios.post(
                 "https://api.paystack.co/transaction/initialize",
@@ -199,6 +204,7 @@ export async function POST(request) {
                     email,
                     amount: amountInKobo,
                     reference,
+                    callback: callbackUrl,
                     channels: ["card", "bank_transfer", "mobile_money"],
                     metadata: {
                         orderIds: orderIds.join(','),
