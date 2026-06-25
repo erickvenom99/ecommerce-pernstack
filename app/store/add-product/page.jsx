@@ -6,6 +6,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
 
+
 export default function StoreAddProduct() {
 
     const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Beauty & Health', 'Toys & Games', 'Sports & Outdoors', 'Books & Media', 'Food & Drink', 'Hobbies & Crafts', 'Others']
@@ -19,6 +20,7 @@ export default function StoreAddProduct() {
         category: "",
     })
     const [loading, setLoading] = useState(false)
+    const [aiUsed, setAiUsed] = useState(false)
     const { getToken } = useAuth()
 
 
@@ -26,12 +28,59 @@ export default function StoreAddProduct() {
         setProductInfo({ ...productInfo, [e.target.name]: e.target.value })
     }
 
+    const handleImageUpload = async(key, file) => {
+        if(!file) return;
+        setImages(prev => ({
+            ...prev, [key]: file
+        }))
+        if(key === "1" && !aiUsed){
+            const formData = new FormData()
+            formData.append('image', file)
+
+            try {
+                const token = await getToken()
+                await toast.promise(
+                    axios.post('/api/store/ai', formData, {headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${token}`
+                    }}),
+                    {
+                        loading: 'Ai is analysing your primary image....',
+                        success: (res)=> {
+                            const data = res.data
+                            if(data.name && data.description){
+                                setProductInfo(prev => ({
+                                    ...prev, 
+                                    name: data.name, 
+                                    description: data.description
+                                }))
+
+                                setAiUsed(true)
+                                
+                                return 'Ai product details populated successfully'
+                            }
+                            return 'Could not extract clear information'
+                        },
+                        error: (err => err?.response?.data?.error || err.message)
+                    }
+                )
+            }catch(error) {
+                console.error('Ai generation error', error)
+
+            }
+        }
+
+    }
+
+
+
+
     const onSubmitHandler = async (e) => {
         e.preventDefault()
         // Logic to add a product
         try {
             //if no images are uploaded then return
-            if(!images[1] && !images[2] && images[3] && !images[4]){
+            if(!images[1] && !images[2] && !images[3] && !images[4]){
                 toast.error('PLease upload at least one image')
             }
             setLoading(true)
@@ -79,7 +128,10 @@ export default function StoreAddProduct() {
                 {Object.keys(images).map((key) => (
                     <label key={key} htmlFor={`images${key}`}>
                         <Image width={300} height={300} className='h-15 w-auto border border-slate-200 rounded cursor-pointer' src={images[key] ? URL.createObjectURL(images[key]) : assets.upload_area} alt="" />
-                        <input type="file" accept='image/*' id={`images${key}`} onChange={e => setImages({ ...images, [key]: e.target.files[0] })} hidden />
+                        <input type="file" 
+                        accept='image/*' 
+                        id={`images${key}`}
+                        onChange={e => handleImageUpload(key, e.target.files[0])} hidden />
                     </label>
                 ))}
             </div>
