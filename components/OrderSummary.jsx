@@ -135,7 +135,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                                 ))}
                             </select>
                         )}
-                        <button disabled={loading} className='flex items-center gap-1 text-slate-600 mt-1 disabled:opacity-40' onClick={() => setShowAddressModal(true)} >Add Address <PlusIcon size={18} /></button>
+                        <button disabled={loading} className='flex items-center gap-1 text-amber-600 mt-1 disabled:opacity-40' onClick={() => setShowAddressModal(true)} >Add Address <PlusIcon size={18} /></button>
                     </div>
                 )}
             </div>
@@ -156,7 +156,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                 {!coupon ? (
                     <form onSubmit={e => toast.promise(handleCouponCode(e), { loading: 'Checking Coupon...' })} className='flex justify-center gap-3 mt-3'>
                         <input disabled={loading} onChange={(e) => setCouponCodeInput(e.target.value)} value={couponCodeInput} type="text" placeholder='Coupon Code' className='border border-slate-400 p-1.5 rounded w-full outline-none bg-white' />
-                        <button disabled={loading} className='bg-slate-600 text-white px-3 rounded hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-40'>Apply</button>
+                        <button disabled={loading} className='bg-amber-500 text-white px-3 rounded hover:bg-amber-600 active:scale-95 transition-all disabled:opacity-40'>Apply</button>
                     </form>
                 ) : (
                     <div className='w-full flex items-center justify-center gap-2 text-xs mt-2'>
@@ -188,7 +188,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                 }} 
                 disabled={loading || items.length === 0}
                 className={`w-full text-white py-2.5 rounded active:scale-95 transition-all disabled:opacity-50 font-medium cursor-pointer ${
-                    paymentMethod === 'PAYSTACK' && !loading ? 'bg-teal-600 hover:bg-teal-700' : 'bg-slate-700 hover:bg-slate-900'
+                    paymentMethod === 'PAYSTACK' && !loading ? 'bg-green-500 hover:bg-teal-700' : 'bg-amber-500 hover:bg-slate-900'
                 }`}
             >
                 {loading ? "Processing Secure Channels..." : paymentMethod === 'PAYSTACK' ? "Pay with Paystack" : "Place Order"}

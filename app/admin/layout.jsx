@@ -1,8 +1,8 @@
 import AdminAuthWrapper from "@/components/admin/AdminAuthWrapper"
 
 export const metadata = {
-    title: "GoCart. - Admin",
-    description: "GoCart. - Admin",
+    title: "Ally-Buy. - Admin",
+    description: "Ally-Buy. - Admin",
 };
 
 export default function RootAdminLayout({ children }) {
