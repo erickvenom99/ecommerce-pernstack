@@ -1,8 +1,8 @@
 import StoreAuthWrapper from "@/components/store/StoreAuthWrapper";
 
 export const metadata = {
-    title: "GoCart. - Store Dashboard",
-    description: "GoCart. - Store Dashboard",
+    title: "Ally-Buy. - Store Dashboard",
+    description: "Ally-Buy. - Store Dashboard",
 };
 
 export default function RootAdminLayout({ children }) {

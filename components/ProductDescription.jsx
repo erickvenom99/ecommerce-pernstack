@@ -9,7 +9,7 @@ const ProductDescription = ({ product }) => {
     const [selectedTab, setSelectedTab] = useState('Description')
 
     return (
-        <div className="my-18 text-sm text-slate-600">
+        <div className="my-18 text-sm text-amber-500">
 
             {/* Tabs */}
             <div className="flex border-b border-slate-200 mb-6 max-w-2xl">

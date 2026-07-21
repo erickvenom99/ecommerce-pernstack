@@ -64,7 +64,7 @@ export default function StoreOrders() {
 
     return (
         <>
-            <h1 className="text-2xl text-slate-500 mb-5">Store <span className="text-slate-800 font-medium">Orders</span></h1>
+            <h1 className="text-2xl text-green-500 mb-5">Store <span className="text-amber-500 font-medium">Orders</span></h1>
             {orders.length === 0 ? (
                 <p>No orders found</p>
             ) : (
