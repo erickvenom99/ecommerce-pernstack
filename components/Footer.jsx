@@ -25,7 +25,9 @@ const Footer = () => {
             title: "WEBSITE?",
             links: [
                 { text: "Home", path: '/', icon: null },
-                { text: "Privacy Policy", path: '/', icon: null },
+                { text: "Privacy Policy", path: '/Policy', icon: null },
+                { text: "Terms of Service", path: '/Terms', icon: null },
+                { text: "Refund Policy", path: '/RefundPage', icon: null },
                 { text: "Become Plus Member", path: '/pricing', icon: null },
                 { text: "Create Your Store", path: '/create-store', icon: null },
             ]
@@ -35,14 +37,14 @@ const Footer = () => {
             links: [
                 { text: "+234-806-087-2223", path: '/', icon: MailIcon },
                 { text: "allybuy23@gmail.com", path: '/', icon: PhoneIcon },
-                { text: "No 14 Jesse-Hillary street, 32108", path: '/', icon: MapPinIcon }
+               // { text: "No 14 Jesse-Hillary street, 32108", path: '/', icon: MapPinIcon }
             ]
         }
     ];
 
     const socialIcons = [
-        { icon: FacebookIcon, link: "https: www.facebook.com/allybuyxo/" },
-        { icon: InstagramIcon, link: "https:/https://www.instagram.com/allybuy23/" },
+        { icon: FacebookIcon, link: "https://www.facebook.com/allybuyxo/" },
+        { icon: InstagramIcon, link: "https://www.instagram.com/allybuy23/" },
         { icon: TwitterIcon, link: "https://twitter.com" },
         { icon: LinkedinIcon, link: "https://www.linkedin.com" },
     ]
@@ -55,12 +57,12 @@ const Footer = () => {
                         <Link href="/" className="text-4xl font-semibold text-slate-700">
                             <img src={assets.allybuylogo.src} alt="Logo" height={60} width={150}/>
                         </Link>
-                        <p className="max-w-[410px] mt-6 text-sm">Welcome to gocart, your ultimate destination for the latest and smartest gadgets. From smartphones and smartwatches to essential accessories, we bring you the best in innovation — all in one place.</p>
+                        <p className="max-w-[410px] mt-6 text-sm">Welcome to AllyBuy, your ultimate destination for the latest and smartest gadgets. From smartphones and smartwatches to essential accessories, we bring you the best in innovation — all in one place.</p>
                         <div className="flex items-center gap-3 mt-5">
                             {socialIcons.map((item, i) => (
-                                <Link href={item.link} key={i} className="flex items-center justify-center w-10 h-10 bg-slate-100 hover:scale-105 hover:border border-slate-300 transition rounded-full">
+                                <a href={item.link} key={i} className="flex items-center justify-center w-10 h-10 bg-slate-100 hover:scale-105 hover:border border-slate-300 transition rounded-full">
                                     <item.icon />
-                                </Link>
+                                </a>
                             ))}
                         </div>
                     </div>

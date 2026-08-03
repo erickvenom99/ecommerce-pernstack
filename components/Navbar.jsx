@@ -80,14 +80,10 @@ const Navbar = () => {
                                     <UserButton.MenuItems>
                                         <UserButton.Action labelIcon={<ShoppingCart size={16}/>} label="Cart" 
                                         onClick={()=>router.push('/cart')}/>
-                                    </UserButton.MenuItems>
-                                </UserButton>
-                                <UserButton>
-                                    <UserButton.MenuItems>
-                                        <UserButton.Action labelIcon={<PackageIcon size={16}/>} label="My Orders" 
+                                         <UserButton.Action labelIcon={<PackageIcon size={16}/>} label="My Orders" 
                                         onClick={()=>router.push('/orders')}/>
                                     </UserButton.MenuItems>
-                                </UserButton>                              
+                                </UserButton>                            
                             </div>
                         ): (
                             <button onClick={openSignIn} className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full">
