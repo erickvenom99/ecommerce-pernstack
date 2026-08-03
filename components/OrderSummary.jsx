@@ -193,6 +193,11 @@ const OrderSummary = ({ totalPrice, items }) => {
             >
                 {loading ? "Processing Secure Channels..." : paymentMethod === 'PAYSTACK' ? "Pay with Paystack" : "Place Order"}
             </button>
+
+            {showAddressModal && (
+                <AddressModal setShowAddressModal={setShowAddressModal} />
+            )}
+
         </div>
     );
 };
