@@ -26,13 +26,23 @@ import foot_wear from './foot_wear.png'
 import unique_hair from './unique_hair.png'
 import red_snickers from './red_snickers.png'
 import model3 from './model3.png'
+import product_10 from './product_10.png'
+import product_14 from './product_14.png'
+import glodenfloralflad4 from './goldenfloralflad4.webp'
+import secnicprentedlongdress2 from './secnicprentedlongdress2.webp'
+import vinctageprintedddress4 from './vinctageprintedddress4.webp'
+import africanmen3 from './africanmengreen.jpg'
+import ethnicprintedmesh from './ethnicprintedmeshgolden.jpg'
+import ethnicprintedmen from './ethnicprintedmen.webp'
 
 export const assets = {
     upload_area, hero_model_img,
     hero_product_img1, hero_product_img2, gs_logo,
     product_img1, product_img2, product_img3, product_img4, product_img5, product_img6,
     product_img7, product_img8, product_img9, product_img10, product_img11, product_img12,
-    allybuylogo, male_model, foot_wear, unique_hair, red_snickers, model3
+    allybuylogo, male_model, foot_wear, unique_hair, red_snickers, model3, product_10, product_14,
+    glodenfloralflad4, secnicprentedlongdress2, vinctageprintedddress4, africanmen3, ethnicprintedmesh,
+    ethnicprintedmen
 
 }
 
