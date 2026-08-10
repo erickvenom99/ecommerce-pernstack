@@ -102,9 +102,9 @@ export async function POST(request) {
             })
         }
 
-        // Calculate split shipping fee distribution metrics
+        // Calculate split shipping fee distribution metrics (5000 naira total shipping)
         const totalVendors = ordersByStore.size
-        const shippingPerVendor = (!isMemberPlan && totalVendors > 0) ? (5 / totalVendors) : 0
+        const shippingPerVendor = (!isMemberPlan && totalVendors > 0) ? (5000 / totalVendors) : 0
 
         // Fetch user's primary email address
         const email = clerkUser.emailAddresses[0]?.emailAddress;
@@ -163,8 +163,6 @@ export async function POST(request) {
                         paymentMethod,
                         isCouponUsed: Boolean(coupon),
                         coupon: coupon ? coupon : null,
-                        // 🟢 We assign the payment tracking reference here!
-                        // This allows your upcoming webhook to trace exactly which orders are paid.
                         paymentReference: paymentMethod === 'PAYSTACK' ? reference : null, 
                         orderItems: {
                             create: sellerItems.map(item => ({
@@ -188,7 +186,7 @@ export async function POST(request) {
             }
         })
 
-        // 🟢STEP 2: Safe space to handle HTTP operations with Paystack API clusters outside of DB locks
+        // 🟢 STEP 2: Handle Paystack API session initialization
         let paystackSession = null
         if (paymentMethod === 'PAYSTACK') {
             const amountInKobo = Math.round(fullAmount * 100)
@@ -209,7 +207,7 @@ export async function POST(request) {
                     metadata: {
                         orderIds: orderIds.join(','),
                         userId,
-                        appId: 'gocart'
+                        appId: 'allybuy'
                     }
                 },
                 {
@@ -228,7 +226,6 @@ export async function POST(request) {
             }
         }
 
-        // 🟢 FIX: Returning the payload down to sync up with OrderSummary.jsx state
         return NextResponse.json({
             message: "Order created successfully",
             paystackSession,
@@ -254,7 +251,6 @@ export async function GET(request) {
                 userId, 
                 OR: [
                     { paymentMethod: PaymentMethod.COD },
-                    // Only show Paystack items to customers if verification confirmations successfully updated `isPaid`
                     { AND: [{ paymentMethod: PaymentMethod.PAYSTACK }, { isPaid: true }] }
                 ]
             },

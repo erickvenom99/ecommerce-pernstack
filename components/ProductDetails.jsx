@@ -1,7 +1,7 @@
 'use client'
 
 import { addToCart, uploadCart } from "@/lib/features/cart/cartSlice";
-import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon } from "lucide-react";
+import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
@@ -16,11 +16,16 @@ const ProductDetails = ({ product }) => {
 
     const cart = useSelector(state => state.cart.cartItems);
     const dispatch = useDispatch();
-    const {getToken} = useAuth()
+    const {getToken} = useAuth();
 
-    const router = useRouter()
+    const router = useRouter();
 
     const [mainImage, setMainImage] = useState(product.images[0]);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State to track full image modal
+
+    const formatPrice = (price) => {
+        return price !== undefined && price !== null ? Number(price).toLocaleString('en-US') : '0';
+    }
 
     const addToCartHandler = async () => {
         dispatch(addToCart({ productId }))
@@ -44,10 +49,15 @@ const ProductDetails = ({ product }) => {
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-center items-center h-100 sm:size-113 bg-slate-100 rounded-lg ">
-                    <Image src={mainImage} alt="" width={250} height={250} />
+                {/* Main image container now triggers the full-screen modal */}
+                <div 
+                    onClick={() => setIsModalOpen(true)} 
+                    className="flex justify-center items-center h-100 sm:size-113 bg-slate-100 rounded-lg cursor-pointer hover:opacity-95 transition"
+                >
+                    <Image src={mainImage} alt={product.name} width={250} height={250} className="object-contain" />
                 </div>
             </div>
+
             <div className="flex-1">
                 <h1 className="text-3xl font-semibold text-amber-500">{product.name}</h1>
                 <div className='flex items-center mt-2'>
@@ -57,8 +67,8 @@ const ProductDetails = ({ product }) => {
                     <p className="text-sm ml-3 text-slate-500">{product.rating.length} Reviews</p>
                 </div>
                 <div className="flex items-start my-6 gap-3 text-2xl font-semibold text-amber-500">
-                    <p> {currency}{product.price} </p>
-                    <p className="text-xl text-slate-500 line-through">{currency}{product.mrp}</p>
+                    <p> {currency}{formatPrice(product.price)} </p>
+                    <p className="text-xl text-slate-500 line-through">{currency}{formatPrice(product.mrp)}</p>
                 </div>
                 <div className="flex items-center gap-2 text-slate-500">
                     <TagIcon size={14} />
@@ -83,8 +93,36 @@ const ProductDetails = ({ product }) => {
                     <p className="flex gap-3"> <CreditCardIcon className="text-slate-400" /> 100% Secured Payment </p>
                     <p className="flex gap-3"> <UserIcon className="text-slate-400" /> Trusted by top brands </p>
                 </div>
-
             </div>
+
+            {/* Full-screen Image Modal */}
+            {isModalOpen && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                    onClick={() => setIsModalOpen(false)}
+                >
+                    <div 
+                        className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center"
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the image area
+                    >
+                        <button 
+                            onClick={() => setIsModalOpen(false)}
+                            className="absolute top-2 right-2 p-2 bg-black/50 text-white rounded-full hover:bg-black/75 transition z-10"
+                            aria-label="Close modal"
+                        >
+                            <X size={24} />
+                        </button>
+                        <div className="relative w-full h-full max-h-[85vh]">
+                            <Image 
+                                src={mainImage} 
+                                alt={product.name} 
+                                fill 
+                                className="object-contain"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
