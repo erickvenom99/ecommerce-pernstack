@@ -6,7 +6,7 @@ import AddressModal from './AddressModal';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Show, useAuth, useUser } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import axios from 'axios';
 import { fetchCart, clearCart } from '@/lib/features/cart/cartSlice';
 
@@ -25,6 +25,14 @@ const OrderSummary = ({ totalPrice, items }) => {
     const [couponCodeInput, setCouponCodeInput] = useState('');
     const [coupon, setCoupon] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // 1. Determine shipping fee based on user plan (Clerk publicMetadata or plan status)
+    const isPlusUser = user?.publicMetadata?.plan === 'plus'; 
+    const shippingFee = isPlusUser ? 0 : 5000;
+
+    // 2. Calculate discount and final total cleanly
+    const discountAmount = coupon ? (coupon.discount / 100) * totalPrice : 0;
+    const finalTotal = totalPrice + shippingFee - discountAmount;
 
     const handleCouponCode = async (event) => {
         event.preventDefault();
@@ -53,6 +61,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                 addressId: selectedAddress.id,
                 paymentMethod,
                 items,
+                shippingFee: Number(shippingFee),
+                totalAmount: Number(finalTotal),
                 ...(coupon && { couponCode: coupon.code })
             };
             
@@ -66,14 +76,11 @@ const OrderSummary = ({ totalPrice, items }) => {
                     throw new Error('Failed to provision secure Paystack authorization codes');
                 }
                 
-                // 🚀 DYNAMIC IMPORT OF THE NEW OFFICIAL PAYSTACK SDK
-                // This keeps it running cleanly purely on the client browser environment
                 const { default: PaystackPop } = await import('@paystack/inline-js');
                 const popup = new PaystackPop();
 
-                // Fire the transaction open using the server-generated access code
                 popup.resumeTransaction(session.access_code, {
-                    onSuccess: (transaction) => {
+                    onSuccess: () => {
                         toast.success('Payment completed successfully!');
                         dispatch(clearCart());
                         dispatch(fetchCart({ getToken }));
@@ -149,8 +156,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                     </div>
                     <div className='flex flex-col gap-1 font-medium text-right'>
                         <p>{currency}{totalPrice.toLocaleString()}</p>
-                        <div><Show when={{plan:'plus'}} fallback={`${currency}5`}>Free</Show></div>
-                        {coupon && <p>{`-${currency}${(coupon.discount / 100 * totalPrice).toFixed(2)}`}</p>}
+                        <p>{shippingFee === 0 ? 'Free' : `${currency}${shippingFee.toLocaleString()}`}</p>
+                        {coupon && <p>{`-${currency}${discountAmount.toLocaleString()}`}</p>}
                     </div>
                 </div>
                 {!coupon ? (
@@ -168,11 +175,9 @@ const OrderSummary = ({ totalPrice, items }) => {
             </div>
             
             <div className='flex justify-between py-4'>
-                <p>Total:</p>
-                <p className='font-medium text-right'>
-                    <Show when={{plan: 'plus'}} fallback={`${currency}${coupon ? (totalPrice + 5 - (coupon.discount / 100 * totalPrice)).toFixed(2) : (totalPrice + 5).toLocaleString()}`}>
-                        {currency}{coupon ? (totalPrice - (coupon.discount / 100 * totalPrice)).toFixed(2) : totalPrice.toLocaleString()}
-                    </Show> 
+                <p className='font-medium text-slate-700'>Total:</p>
+                <p className='font-semibold text-right text-slate-800 text-base'>
+                    {currency}{finalTotal.toLocaleString()}
                 </p>
             </div>
             
@@ -191,7 +196,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                     paymentMethod === 'PAYSTACK' && !loading ? 'bg-green-500 hover:bg-teal-700' : 'bg-amber-500 hover:bg-slate-900'
                 }`}
             >
-                {loading ? "Processing Secure Channels..." : paymentMethod === 'PAYSTACK' ? "Pay with Paystack" : "Place Order"}
+                {loading ? "Processing..." : paymentMethod === 'PAYSTACK' ? "Pay with Paystack" : "Place Order"}
             </button>
 
             {showAddressModal && (

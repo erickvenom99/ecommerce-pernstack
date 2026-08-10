@@ -57,7 +57,7 @@ const Footer = () => {
                         <Link href="/" className="text-4xl font-semibold text-slate-700">
                             <img src={assets.allybuylogo.src} alt="Logo" height={60} width={150}/>
                         </Link>
-                        <p className="max-w-[410px] mt-6 text-sm">Welcome to AllyBuy, your ultimate destination for the latest and smartest gadgets. From smartphones and smartwatches to essential accessories, we bring you the best in innovation — all in one place.</p>
+                        <p className="max-w-[410px] mt-6 text-sm">Welcome to AllyBuy, your ultimate destination for the latest and smartest Fashion wears and Accessories. From clothes, Shoes, Snickers, Hairs  and jewelries to essential accessories, we bring you the best brands with latest wears and affordable prices — all in one place.</p>
                         <div className="flex items-center gap-3 mt-5">
                             {socialIcons.map((item, i) => (
                                 <a href={item.link} key={i} className="flex items-center justify-center w-10 h-10 bg-slate-100 hover:scale-105 hover:border border-slate-300 transition rounded-full">
@@ -83,7 +83,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <p className="py-4 text-sm text-slate-500">
-                    Copyright 2025 © gocart All Right Reserved.
+                    Copyright 2025 © Ally-Buy All Right Reserved.
                 </p>
             </div>
         </footer>
