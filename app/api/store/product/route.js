@@ -1,4 +1,4 @@
-import  imagekit  from "@/lib/imagekit";
+import imagekit from "@/lib/imagekit";
 import { prisma } from "@/lib/prisma";
 import { toFile } from "@imagekit/nodejs";
 import authSeller from "@/middleware/authSeller";
@@ -33,6 +33,20 @@ export async function POST(request) {
         const description = formData.get('description');
         const category = formData.get('category');
         const images = formData.getAll('images');
+
+        // 🟢 SAFELY EXTRACT AND PARSE SIZES
+        const sizesRaw = formData.get('sizes');
+        let sizes = [];
+        if (sizesRaw) {
+            try {
+                sizes = JSON.parse(sizesRaw);
+                // Ensure it parsed to an array of strings
+                if (!Array.isArray(sizes)) sizes = [];
+            } catch (e) {
+                console.error("Failed to parse sizes JSON:", e);
+                sizes = [];
+            }
+        }
 
         // 1. HARDENED VALIDATION: Safely parse numbers and catch NaN mutations
         const mrp = Number(formData.get('mrp'));
@@ -88,6 +102,7 @@ export async function POST(request) {
                 mrp,
                 price,
                 category,
+                sizes, // 🟢 PASS THE PARSED ARRAY TO PRISMA
                 images: imagesUrl,
                 storeId: storeInfo.id
             }
