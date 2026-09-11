@@ -17,7 +17,7 @@ const BestSelling = () => {
                 href='/shop' 
             />
             {/* Same grid layout and properties as LatestProducts.jsx for exact visual consistency */}
-            <div className='mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+            <div className='mt-8 sm:mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6'>
                 {products
                     .slice()
                     .sort((a, b) => (b.rating?.length || 0) - (a.rating?.length || 0))

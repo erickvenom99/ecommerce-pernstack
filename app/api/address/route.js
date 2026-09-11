@@ -28,9 +28,9 @@ export async function POST(request){
 }
 
 
+
+
 //get all addresses 
-
-
 export async function GET(request){
     try {
         const {userId} = await auth()

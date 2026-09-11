@@ -10,14 +10,14 @@ const LatestProducts = () => {
     const products = useSelector(state => state.product.list)
 
     return (
-        <div className='px-6 my-30 max-w-6xl mx-auto'>
+        <div className='px-4 sm:px-6 my-16 sm:my-30 max-w-6xl mx-auto'>
             <Title 
                 title='Latest Products' 
                 description={`Showing ${products.length < displayQuantity ? products.length : displayQuantity} of ${products.length} products`} 
                 href='/shop' 
             />
-            {/* Switched from flex-wrap to Tailwind Grid for consistent 4-column layout */}
-            <div className='mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+            {/* Updated grid configuration: 2 columns on mobile, scaling up to 4 on desktop */}
+            <div className='mt-8 sm:mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6'>
                 {products
                     .slice()
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
